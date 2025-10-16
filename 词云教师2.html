@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师高频词展示端</title>
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFD166;
+            --light-color: #F7FFF7;
+            --dark-color: #1A535C;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', '楷体', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .description {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .panels {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .panel h2 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+            border-bottom: 3px dashed var(--accent-color);
+            padding-bottom: 10px;
+        }
+        
+        /* 高频词展示样式 */
+        .word-cloud-container {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+        
+        .word-cloud {
+            height: 400px;
+            border: 3px dashed var(--secondary-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            overflow: hidden;
+            position: relative;
+            background-color: white;
+        }
+        
+        .word {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .word:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        
+        /* 学生提交内容样式 */
+        .submissions-container {
+            background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);
+        }
+        
+        .submissions-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .submission-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .submission-content {
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background-color: var(--dark-color);
+            transform: translateY(-3px);
+        }
+        
+        .instructions {
+            background-color: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .instructions h3 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .student-link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .student-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .student-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .statistics {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .connection-status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .refresh-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .panels {
+                flex-direction: column;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 教师高频词展示端</h1>
+            <p class="description">查看学生提交的文字内容，分析高频词汇，让课堂互动更有趣！</p>
+        </header>
+        
+        <div class="connection-status connected" id="connectionStatus">
+            ✅ 系统已连接，正在监听学生提交...
+        </div>
+        
+        <div class="statistics">
+            <div class="stat-item">
+                <div class="stat-value" id="totalSubmissions">0</div>
+                <div class="stat-label">总提交数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalStudents">0</div>
+                <div class="stat-label">参与学生</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalWords">0</div>
+                <div class="stat-label">总词数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="uniqueWords">0</div>
+                <div class="stat-label">不同词汇</div>
+            </div>
+        </div>
+        
+        <div class="refresh-info">
+            系统每3秒自动刷新数据
+        </div>
+        
+        <div class="panels">
+            <div class="panel word-cloud-container">
+                <h2>📈 高频词云</h2>
+                <div class="word-cloud" id="wordCloud">
+                    <!-- 高频词将在这里动态显示 -->
+                </div>
+                
+                <div class="controls">
+                    <button id="refreshButton">立即刷新</button>
+                    <button id="clearAllButton">清空所有内容</button>
+                </div>
+            </div>
+            
+            <div class="panel submissions-container">
+                <h2>📝 学生提交内容</h2>
+                <div class="submissions-list" id="submissionsList">
+                    <!-- 学生提交内容将在这里显示 -->
+                </div>
+                
+                <div class="controls">
+                    <button id="exportButton">导出数据</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="student-link">
+            <p>学生提交内容请访问：<a href="student.html" target="_blank">学生端</a></p>
+        </div>
+        
+        <div class="instructions">
+            <h3>教师说明：</h3>
+            <ul>
+                <li>系统自动分析学生文字中的高频词汇</li>
+                <li>词语越大、颜色越深，表示出现频率越高</li>
+                <li>点击词语可以查看具体出现次数</li>
+                <li>使用"立即刷新"按钮手动更新显示</li>
+                <li>使用"清空所有内容"可以重置所有学生提交</li>
+                <li>使用"导出数据"可以将学生提交内容导出为文本文件</li>
+                <li><strong>注意：系统每3秒自动刷新一次数据，可以接收所有设备的学生提交</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 颜色数组 - 用于不同频率的词
+        const colors = [
+            "#FF6B6B", "#4ECDC4", "#FFD166", "#6A0572", "#118AB2",
+            "#06D6A0", "#EF476F", "#073B4C", "#7209B7", "#3A86FF"
+        ];
+        
+        // DOM元素
+        const wordCloud = document.getElementById('wordCloud');
+        const submissionsList = document.getElementById('submissionsList');
+        const refreshButton = document.getElementById('refreshButton');
+        const clearAllButton = document.getElementById('clearAllButton');
+        const exportButton = document.getElementById('exportButton');
+        const totalSubmissions = document.getElementById('totalSubmissions');
+        const totalStudents = document.getElementById('totalStudents');
+        const totalWords = document.getElementById('totalWords');
+        const uniqueWords = document.getElementById('uniqueWords');
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        // 模拟服务器API
+        const SERVER_API = {
+            // 获取所有提交
+            getSubmissions: function() {
+                return new Promise((resolve) => {
+                    const submissions = JSON.parse(localStorage.getItem('serverSubmissions') || '[]');
+                    resolve(submissions);
+                });
+            },
+            
+            // 清空所有提交
+            clearSubmissions: function() {
+                return new Promise((resolve) => {
+                    localStorage.setItem('serverSubmissions', '[]');
+                    resolve({success: true});
+                });
+            }
+        };
+        
+        // 全局变量
+        let studentSubmissions = [];
+        let wordFrequencies = {};
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            console.log("教师端初始化...");
+            
+            // 教师端功能
+            refreshButton.addEventListener('click', updateDisplay);
+            clearAllButton.addEventListener('click', clearAllSubmissions);
+            exportButton.addEventListener('click', exportData);
+            
+            // 加载初始数据
+            loadSubmissions();
+            
+            // 设置定时刷新
+            setInterval(loadSubmissions, 3000);
+            
+            console.log("教师端初始化完成");
+        });
+        
+        // 加载学生提交数据
+        async function loadSubmissions() {
+            try {
+                studentSubmissions = await SERVER_API.getSubmissions();
+                console.log("加载了", studentSubmissions.length, "条学生提交");
+                updateDisplay();
+                
+                // 更新连接状态
+                connectionStatus.textContent = "✅ 系统已连接，正在监听学生提交...";
+                connectionStatus.className = "connection-status connected";
+            } catch (error) {
+                console.error("加载数据失败:", error);
+                studentSubmissions = [];
+                updateDisplay();
+                
+                // 更新连接状态
+                connectionStatus.textContent = "❌ 数据加载失败，请刷新页面";
+                connectionStatus.className = "connection-status disconnected";
+            }
+        }
+        
+        // 更新显示
+        function updateDisplay() {
+            updateStatistics();
+            updateSubmissionsList();
+            updateWordCloud();
+        }
+        
+        // 更新统计信息
+        function updateStatistics() {
+            // 计算总提交数
+            totalSubmissions.textContent = studentSubmissions.length;
+            
+            // 计算参与学生数
+            const studentSet = new Set();
+            studentSubmissions.forEach(submission => {
+                studentSet.add(submission.id);
+            });
+            totalStudents.textContent = studentSet.size;
+            
+            // 计算总词数和不同词汇数
+            let allWords = [];
+            studentSubmissions.forEach(submission => {
+                const words = extractWords(submission.transcript);
+                allWords = allWords.concat(words);
+            });
+            
+            totalWords.textContent = allWords.length;
+            
+            const uniqueWordSet = new Set(allWords);
+            uniqueWords.textContent = uniqueWordSet.size;
+        }
+        
+        // 更新学生提交列表
+        function updateSubmissionsList() {
+            submissionsList.innerHTML = '';
+            
+            if (studentSubmissions.length === 0) {
+                submissionsList.innerHTML = '<p style="text-align: center; color: #666;">暂无学生提交内容</p>';
+                return;
+            }
+            
+            // 按时间倒序排列
+            const sortedSubmissions = [...studentSubmissions].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedSubmissions.forEach(submission => {
+                const submissionItem = document.createElement('div');
+                submissionItem.className = 'submission-item';
+                
+                const submissionHeader = document.createElement('div');
+                submissionHeader.className = 'submission-header';
+                submissionHeader.innerHTML = `
+                    <span>学生 ${submission.id}</span>
+                    <span>${formatDate(submission.timestamp)}</span>
+                `;
+                
+                const submissionContent = document.createElement('div');
+                submissionContent.className = 'submission-content';
+                submissionContent.textContent = submission.transcript;
+                
+                submissionItem.appendChild(submissionHeader);
+                submissionItem.appendChild(submissionContent);
+                
+                submissionsList.appendChild(submissionItem);
+            });
+        }
+        
+        // 更新词云显示
+        function updateWordCloud() {
+            wordCloud.innerHTML = '';
+            
+            // 重新计算词频
+            wordFrequencies = {};
+            studentSubmissions.forEach(submission => {
+                const words = extractWords(submission.transcript);
+                words.forEach(word => {
+                    if (wordFrequencies[word]) {
+                        wordFrequencies[word]++;
+                    } else {
+                        wordFrequencies[word] = 1;
+                    }
+                });
+            });
+            
+            // 获取所有词语并排序
+            const words = Object.keys(wordFrequencies);
+            if (words.length === 0) {
+                wordCloud.innerHTML = '<p style="text-align: center; color: #666; margin-top: 50%; transform: translateY(-50%);">暂无高频词数据</p>';
+                return;
+            }
+            
+            // 计算最大频率
+            const maxFrequency = Math.max(...Object.values(wordFrequencies));
+            
+            // 为每个词语创建元素
+            words.forEach(word => {
+                const frequency = wordFrequencies[word];
+                const fontSize = 20 + (frequency / maxFrequency) * 60; // 基础20px + 根据频率缩放
+                
+                // 创建词语元素
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word';
+                wordElement.textContent = word;
+                wordElement.style.fontSize = `${fontSize}px`;
+                
+                // 根据频率选择颜色
+                const colorIndex = Math.min(
+                    Math.floor((frequency / maxFrequency) * colors.length),
+                    colors.length - 1
+                );
+                wordElement.style.color = colors[colorIndex];
+                
+                // 随机位置（避免重叠的简单实现）
+                const left = Math.random() * (wordCloud.offsetWidth - 100);
+                const top = Math.random() * (wordCloud.offsetHeight - 50);
+                wordElement.style.left = `${left}px`;
+                wordElement.style.top = `${top}px`;
+                
+                // 添加点击事件显示频率
+                wordElement.addEventListener('click', function() {
+                    alert(`"${word}" 出现了 ${frequency} 次`);
+                });
+                
+                wordCloud.appendChild(wordElement);
+            });
+        }
+        
+        // 从文本中提取词语（简单实现）
+        function extractWords(text) {
+            // 简单分词处理（实际应用中应使用更复杂的分词算法）
+            return text.split(/[，。！？；,\.!?;\s]+/).filter(word => word.length > 1);
+        }
+        
+        // 格式化日期
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // 清空所有内容
+        async function clearAllSubmissions() {
+            if (confirm("确定要清空所有学生的提交内容吗？此操作不可撤销！")) {
+                try {
+                    await SERVER_API.clearSubmissions();
+                    studentSubmissions = [];
+                    updateDisplay();
+                    alert("所有内容已清空！");
+                } catch (error) {
+                    console.error("清空失败:", error);
+                    alert("清空失败，请重试！");
+                }
+            }
+        }
+        
+        // 导出数据
+        function exportData() {
+            if (studentSubmissions.length === 0) {
+                alert("暂无数据可导出");
+                return;
+            }
+            
+            let exportText = "学生文字提交内容导出\n\n";
+            studentSubmissions.forEach((submission, index) => {
+                exportText += `提交 ${index + 1}:\n`;
+                exportText += `学生ID: ${submission.id}\n`;
+                exportText += `时间: ${new Date(submission.timestamp).toLocaleString()}\n`;
+                exportText += `内容: ${submission.transcript}\n\n`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `学生文字提交_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert("数据导出成功！");
+        }
+    </script>
+</body>
+</html>
