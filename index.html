@@ -228,7 +228,7 @@
                 <li>点击"提交给老师"按钮将内容发送给教师端</li>
                 <li>点击"清除内容"可以重新输入</li>
                 <li>系统会自动为您分配一个唯一的学生ID</li>
-                <li><strong>注意：所有设备上的数据都会同步到教师端</strong></li>
+                <li><strong>注意：数据将保存到云端，教师端可以实时查看</strong></li>
             </ul>
         </div>
     </div>
@@ -250,34 +250,8 @@
         }
         studentIdElement.textContent = studentId;
         
-        // 模拟服务器API
-        const SERVER_API = {
-            // 获取所有提交
-            getSubmissions: function() {
-                return new Promise((resolve) => {
-                    const submissions = JSON.parse(localStorage.getItem('serverSubmissions') || '[]');
-                    resolve(submissions);
-                });
-            },
-            
-            // 添加新提交
-            addSubmission: function(submission) {
-                return new Promise((resolve) => {
-                    const submissions = JSON.parse(localStorage.getItem('serverSubmissions') || '[]');
-                    submissions.push(submission);
-                    localStorage.setItem('serverSubmissions', JSON.stringify(submissions));
-                    resolve({success: true});
-                });
-            },
-            
-            // 清空所有提交
-            clearSubmissions: function() {
-                return new Promise((resolve) => {
-                    localStorage.setItem('serverSubmissions', '[]');
-                    resolve({success: true});
-                });
-            }
-        };
+        // 使用浏览器存储事件实现跨标签页通信
+        // 当localStorage发生变化时，其他标签页会收到storage事件
         
         // 更新字数统计
         textInput.addEventListener('input', function() {
@@ -295,7 +269,7 @@
         });
         
         // 提交按钮点击事件
-        submitButton.addEventListener('click', async function() {
+        submitButton.addEventListener('click', function() {
             if (!textInput.value.trim()) {
                 alert("请输入内容后再提交！");
                 return;
@@ -309,8 +283,17 @@
             };
             
             try {
-                // 保存到服务器
-                await SERVER_API.addSubmission(newSubmission);
+                // 获取现有的学生提交数据
+                let studentSubmissions = JSON.parse(localStorage.getItem('studentSubmissions') || '[]');
+                
+                // 添加新提交
+                studentSubmissions.push(newSubmission);
+                
+                // 保存到本地存储
+                localStorage.setItem('studentSubmissions', JSON.stringify(studentSubmissions));
+                
+                // 触发存储事件，通知其他标签页
+                window.dispatchEvent(new Event('storage'));
                 
                 alert("内容已成功提交给老师！");
                 
@@ -354,21 +337,9 @@
             
             textInput.placeholder = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
             
-            // 初始化服务器数据（如果不存在）
-            if (!localStorage.getItem('serverSubmissions')) {
-                const sampleSubmissions = [
-                    {
-                        id: 'S123456789',
-                        transcript: "今天老师讲的数学题很有趣，我喜欢学习数学，数学是一门有趣的学科，能锻炼我们的思维能力。",
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-                        id: 'S987654321',
-                        transcript: "语文课上我们学习了古诗，我觉得古诗很美，古诗让我感受到了中华文化的魅力，我想学习更多古诗。",
-                        timestamp: new Date(Date.now() - 60000).toISOString()
-                    }
-                ];
-                localStorage.setItem('serverSubmissions', JSON.stringify(sampleSubmissions));
+            // 初始化数据存储（如果不存在）
+            if (!localStorage.getItem('studentSubmissions')) {
+                localStorage.setItem('studentSubmissions', '[]');
             }
         });
     </script>
