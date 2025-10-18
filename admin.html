@@ -365,7 +365,7 @@
         // 加载学生提交数据
         async function loadSubmissions() {
             try {
-                const response = await fetch('api.php');
+                const response = await fetch('api.php?action=get');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -421,17 +421,13 @@
             
             try {
                 // 先清空现有数据
-                await fetch('api.php', { method: 'DELETE' });
+                await fetch('api.php?action=clear');
                 
                 // 逐个添加示例数据
                 for (const submission of sampleSubmissions) {
-                    await fetch('api.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(submission)
-                    });
+                    const transcript = encodeURIComponent(submission.transcript);
+                    const url = `api.php?action=add&id=${submission.id}&transcript=${transcript}`;
+                    await fetch(url);
                 }
                 
                 // 重新加载数据
@@ -544,7 +540,7 @@
         async function clearAllSubmissions() {
             if (confirm("确定要清空所有学生的提交内容吗？此操作不可撤销！")) {
                 try {
-                    const response = await fetch('api.php', { method: 'DELETE' });
+                    const response = await fetch('api.php?action=clear');
                     const result = await response.json();
                     
                     if (result.success) {

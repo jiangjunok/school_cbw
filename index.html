@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +13,14 @@
             --light-color: #F7FFF7;
             --dark-color: #1A535C;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Comic Sans MS', '楷体', sans-serif;
         }
-        
+
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
@@ -28,34 +29,34 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .container {
             max-width: 800px;
             width: 100%;
             background-color: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        
+
         h1 {
             color: var(--dark-color);
             margin-bottom: 20px;
             font-size: 2.5rem;
         }
-        
+
         .description {
             color: #666;
             font-size: 1.2rem;
             margin-bottom: 30px;
         }
-        
+
         .text-input-container {
             text-align: center;
             margin: 30px 0;
         }
-        
+
         .text-input {
             width: 100%;
             height: 200px;
@@ -64,30 +65,30 @@
             border: 3px solid var(--accent-color);
             font-size: 1.2rem;
             resize: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
-        
+
         .text-input:focus {
             outline: none;
             border-color: var(--secondary-color);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
         .input-prompt {
             margin-top: 15px;
             font-size: 1.1rem;
             color: var(--dark-color);
             font-weight: bold;
         }
-        
+
         .button-group {
             display: flex;
             justify-content: center;
             gap: 20px;
             margin-top: 30px;
         }
-        
+
         button {
             background-color: var(--secondary-color);
             color: white;
@@ -97,31 +98,31 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         button:hover {
             background-color: var(--dark-color);
             transform: translateY(-3px);
         }
-        
+
         #submitButton {
             background-color: var(--primary-color);
         }
-        
+
         #submitButton:hover {
             background-color: #FF4757;
         }
-        
+
         .word-count {
             text-align: right;
             margin-top: 5px;
             color: #666;
             font-size: 0.9rem;
         }
-        
+
         .instructions {
-            background-color: rgba(255,255,255,0.8);
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 15px;
             border-radius: 15px;
             margin-top: 30px;
@@ -129,61 +130,61 @@
             color: #555;
             text-align: left;
         }
-        
+
         .instructions h3 {
             color: var(--dark-color);
             margin-bottom: 10px;
             text-align: center;
         }
-        
+
         .instructions ul {
             padding-left: 20px;
         }
-        
+
         .instructions li {
             margin-bottom: 5px;
         }
-        
+
         .teacher-link {
             margin-top: 20px;
             font-size: 1rem;
         }
-        
+
         .teacher-link a {
             color: var(--secondary-color);
             text-decoration: none;
             font-weight: bold;
         }
-        
+
         .teacher-link a:hover {
             text-decoration: underline;
         }
-        
+
         .connection-status {
             margin-top: 15px;
             padding: 10px;
             border-radius: 10px;
             font-weight: bold;
         }
-        
+
         .connected {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .disconnected {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
+
         .student-id {
             margin-top: 15px;
             font-size: 0.9rem;
             color: #666;
         }
-        
+
         @media (max-width: 768px) {
             .button-group {
                 flex-direction: column;
@@ -192,34 +193,35 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>✏️ 学生文字输入端</h1>
         <p class="description">请在下方输入您的想法，然后点击提交按钮</p>
-        
+
         <div class="student-id">
             您的学生ID: <span id="studentId">加载中...</span>
         </div>
-        
+
         <div class="text-input-container">
             <textarea class="text-input" id="textInput" placeholder="请在这里输入您的想法、感受或回答老师的问题..."></textarea>
             <div class="word-count" id="wordCount">字数: 0</div>
             <div class="input-prompt">💡 提示：请尽量多使用不同的词语，这样老师能看到更多的高频词！</div>
         </div>
-        
+
         <div class="connection-status connected" id="connectionStatus">
             ✅ 系统已就绪，可以提交内容
         </div>
-        
+
         <div class="button-group">
             <button id="submitButton">提交给老师</button>
             <button id="clearButton">清除内容</button>
         </div>
-        
+
         <div class="teacher-link">
             <p>老师查看高频词请点击：<a href="admin.html" target="_blank">教师端</a></p>
         </div>
-        
+
         <div class="instructions">
             <h3>使用说明：</h3>
             <ul>
@@ -241,7 +243,7 @@
         const wordCount = document.getElementById('wordCount');
         const connectionStatus = document.getElementById('connectionStatus');
         const studentIdElement = document.getElementById('studentId');
-        
+
         // 学生ID - 自动生成
         let studentId = localStorage.getItem('studentId');
         if (!studentId) {
@@ -249,15 +251,15 @@
             localStorage.setItem('studentId', studentId);
         }
         studentIdElement.textContent = studentId;
-        
+
         // 使用浏览器存储事件实现跨标签页通信
         // 当localStorage发生变化时，其他标签页会收到storage事件
-        
+
         // 更新字数统计
-        textInput.addEventListener('input', function() {
+        textInput.addEventListener('input', function () {
             const count = textInput.value.length;
             wordCount.textContent = `字数: ${count}`;
-            
+
             // 根据字数改变颜色
             if (count > 200) {
                 wordCount.style.color = '#4ECDC4';
@@ -267,48 +269,45 @@
                 wordCount.style.color = '#666';
             }
         });
-        
+
         // 提交按钮点击事件
-        submitButton.addEventListener('click', async function() {
+        submitButton.addEventListener('click', async function () {
             if (!textInput.value.trim()) {
                 alert("请输入内容后再提交！");
                 return;
             }
-            
+
             // 创建新提交
             const newSubmission = {
                 id: studentId,
                 transcript: textInput.value
             };
-            
+
             try {
                 // 显示提交中状态
                 connectionStatus.textContent = "⏳ 正在提交中...";
                 connectionStatus.className = "connection-status connected";
                 submitButton.disabled = true;
-                
-                // 发送到服务器
-                const response = await fetch('api.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newSubmission)
-                });
-                
+
+                // 使用GET请求发送到服务器（避免405错误）
+                const transcript = encodeURIComponent(textInput.value);
+                const url = `api.php?action=add&id=${studentId}&transcript=${transcript}`;
+
+                const response = await fetch(url);
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     alert("内容已成功提交给老师！");
-                    
+
                     // 重置界面
                     textInput.value = '';
                     wordCount.textContent = '字数: 0';
-                    
+
                     // 更新连接状态
                     connectionStatus.textContent = "✅ 内容已成功提交！";
                     connectionStatus.className = "connection-status connected";
-                    
+
                     // 3秒后恢复原状态
                     setTimeout(() => {
                         connectionStatus.textContent = "✅ 系统已就绪，可以提交内容";
@@ -319,22 +318,22 @@
             } catch (error) {
                 console.error('提交失败:', error);
                 alert("提交失败，请重试！错误：" + error.message);
-                
+
                 connectionStatus.textContent = "❌ 提交失败，请重试";
                 connectionStatus.className = "connection-status disconnected";
             } finally {
                 submitButton.disabled = false;
             }
         });
-        
+
         // 清除按钮点击事件
-        clearButton.addEventListener('click', function() {
+        clearButton.addEventListener('click', function () {
             textInput.value = '';
             wordCount.textContent = '字数: 0';
         });
-        
+
         // 页面加载完成后的初始化
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             // 添加示例文本
             const sampleTexts = [
                 "今天老师讲的数学题很有趣，我喜欢学习数学，数学是一门有趣的学科，能锻炼我们的思维能力。",
@@ -343,9 +342,10 @@
                 "科学实验课让我学到了很多新知识，科学实验很有趣，我喜欢做实验，希望以后能成为科学家。",
                 "美术课上我画了一幅美丽的风景画，画画让我感到快乐，我喜欢美术课，因为可以发挥我的想象力。"
             ];
-            
+
             textInput.placeholder = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
         });
     </script>
 </body>
+
 </html>
