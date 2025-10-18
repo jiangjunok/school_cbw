@@ -217,7 +217,7 @@
         </div>
         
         <div class="teacher-link">
-            <p>老师查看高频词请点击：<a href="teacher.html" target="_blank">教师端</a></p>
+            <p>老师查看高频词请点击：<a href="admin.html" target="_blank">教师端</a></p>
         </div>
         
         <div class="instructions">
@@ -269,7 +269,7 @@
         });
         
         // 提交按钮点击事件
-        submitButton.addEventListener('click', function() {
+        submitButton.addEventListener('click', async function() {
             if (!textInput.value.trim()) {
                 alert("请输入内容后再提交！");
                 return;
@@ -278,43 +278,52 @@
             // 创建新提交
             const newSubmission = {
                 id: studentId,
-                transcript: textInput.value,
-                timestamp: new Date().toISOString()
+                transcript: textInput.value
             };
             
             try {
-                // 获取现有的学生提交数据
-                let studentSubmissions = JSON.parse(localStorage.getItem('studentSubmissions') || '[]');
-                
-                // 添加新提交
-                studentSubmissions.push(newSubmission);
-                
-                // 保存到本地存储
-                localStorage.setItem('studentSubmissions', JSON.stringify(studentSubmissions));
-                
-                // 触发存储事件，通知其他标签页
-                window.dispatchEvent(new Event('storage'));
-                
-                alert("内容已成功提交给老师！");
-                
-                // 重置界面
-                textInput.value = '';
-                wordCount.textContent = '字数: 0';
-                
-                // 更新连接状态
-                connectionStatus.textContent = "✅ 内容已成功提交！";
+                // 显示提交中状态
+                connectionStatus.textContent = "⏳ 正在提交中...";
                 connectionStatus.className = "connection-status connected";
+                submitButton.disabled = true;
                 
-                // 3秒后恢复原状态
-                setTimeout(() => {
-                    connectionStatus.textContent = "✅ 系统已就绪，可以提交内容";
-                }, 3000);
+                // 发送到服务器
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newSubmission)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert("内容已成功提交给老师！");
+                    
+                    // 重置界面
+                    textInput.value = '';
+                    wordCount.textContent = '字数: 0';
+                    
+                    // 更新连接状态
+                    connectionStatus.textContent = "✅ 内容已成功提交！";
+                    connectionStatus.className = "connection-status connected";
+                    
+                    // 3秒后恢复原状态
+                    setTimeout(() => {
+                        connectionStatus.textContent = "✅ 系统已就绪，可以提交内容";
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || '提交失败');
+                }
             } catch (error) {
                 console.error('提交失败:', error);
-                alert("提交失败，请重试！");
+                alert("提交失败，请重试！错误：" + error.message);
                 
                 connectionStatus.textContent = "❌ 提交失败，请重试";
                 connectionStatus.className = "connection-status disconnected";
+            } finally {
+                submitButton.disabled = false;
             }
         });
         
@@ -324,7 +333,7 @@
             wordCount.textContent = '字数: 0';
         });
         
-        // 模拟一些学生输入（演示用）
+        // 页面加载完成后的初始化
         window.addEventListener('load', function() {
             // 添加示例文本
             const sampleTexts = [
@@ -336,11 +345,6 @@
             ];
             
             textInput.placeholder = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
-            
-            // 初始化数据存储（如果不存在）
-            if (!localStorage.getItem('studentSubmissions')) {
-                localStorage.setItem('studentSubmissions', '[]');
-            }
         });
     </script>
 </body>

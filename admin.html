@@ -301,7 +301,7 @@
         </div>
         
         <div class="student-link">
-            <p>学生提交内容请访问：<a href="student.html" target="_blank">学生端</a></p>
+            <p>学生提交内容请访问：<a href="index.html" target="_blank">学生端</a></p>
         </div>
         
         <div class="instructions">
@@ -363,67 +363,84 @@
         });
         
         // 加载学生提交数据
-        function loadSubmissions() {
-            const stored = localStorage.getItem('studentSubmissions');
-            if (stored) {
-                studentSubmissions = JSON.parse(stored);
-                console.log("加载了", studentSubmissions.length, "条学生提交");
-                updateDisplay();
+        async function loadSubmissions() {
+            try {
+                const response = await fetch('api.php');
+                const result = await response.json();
                 
-                // 更新连接状态
-                connectionStatus.textContent = "✅ 系统已连接，正在监听学生提交...";
-                connectionStatus.className = "connection-status connected";
-            } else {
-                console.log("暂无学生提交数据");
+                if (result.success) {
+                    studentSubmissions = result.data;
+                    console.log("加载了", studentSubmissions.length, "条学生提交");
+                    updateDisplay();
+                    
+                    // 更新连接状态
+                    connectionStatus.textContent = "✅ 系统已连接，正在监听学生提交...";
+                    connectionStatus.className = "connection-status connected";
+                } else {
+                    throw new Error(result.error || '加载数据失败');
+                }
+            } catch (error) {
+                console.error("加载数据失败:", error);
                 studentSubmissions = [];
                 updateDisplay();
                 
                 // 更新连接状态
-                connectionStatus.textContent = "ℹ️ 暂无学生提交内容";
-                connectionStatus.className = "connection-status connected";
+                connectionStatus.textContent = "❌ 连接服务器失败，请检查网络";
+                connectionStatus.className = "connection-status disconnected";
             }
         }
         
         // 添加示例数据
-        function addSampleData() {
+        async function addSampleData() {
             const sampleSubmissions = [
                 {
                     id: 'S123456789',
-                    transcript: "今天老师讲的数学题很有趣，我喜欢学习数学，数学是一门有趣的学科，能锻炼我们的思维能力。数学让我感到快乐。",
-                    timestamp: new Date().toISOString()
+                    transcript: "今天老师讲的数学题很有趣，我喜欢学习数学，数学是一门有趣的学科，能锻炼我们的思维能力。数学让我感到快乐。"
                 },
                 {
                     id: 'S987654321',
-                    transcript: "语文课上我们学习了古诗，我觉得古诗很美，古诗让我感受到了中华文化的魅力，我想学习更多古诗。语文课很有趣。",
-                    timestamp: new Date(Date.now() - 60000).toISOString()
+                    transcript: "语文课上我们学习了古诗，我觉得古诗很美，古诗让我感受到了中华文化的魅力，我想学习更多古诗。语文课很有趣。"
                 },
                 {
                     id: 'S555555555',
-                    transcript: "体育课我们玩了有趣的游戏，同学们都很开心，体育课是我最喜欢的课程，因为可以锻炼身体还能和同学们一起玩。体育课真有趣。",
-                    timestamp: new Date(Date.now() - 120000).toISOString()
+                    transcript: "体育课我们玩了有趣的游戏，同学们都很开心，体育课是我最喜欢的课程，因为可以锻炼身体还能和同学们一起玩。体育课真有趣。"
                 },
                 {
                     id: 'S444444444',
-                    transcript: "科学实验课让我学到了很多新知识，科学实验很有趣，我喜欢做实验，希望以后能成为科学家。科学课真有意思。",
-                    timestamp: new Date(Date.now() - 180000).toISOString()
+                    transcript: "科学实验课让我学到了很多新知识，科学实验很有趣，我喜欢做实验，希望以后能成为科学家。科学课真有意思。"
                 },
                 {
                     id: 'S333333333',
-                    transcript: "美术课上我画了一幅美丽的风景画，画画让我感到快乐，我喜欢美术课，因为可以发挥我的想象力。美术课真有趣。",
-                    timestamp: new Date(Date.now() - 240000).toISOString()
+                    transcript: "美术课上我画了一幅美丽的风景画，画画让我感到快乐，我喜欢美术课，因为可以发挥我的想象力。美术课真有趣。"
                 },
                 {
                     id: 'S222222222',
-                    transcript: "音乐课我们学唱了一首新歌，旋律优美，歌词动人。音乐让我感到愉悦，我喜欢音乐课。音乐课真有趣。",
-                    timestamp: new Date(Date.now() - 300000).toISOString()
+                    transcript: "音乐课我们学唱了一首新歌，旋律优美，歌词动人。音乐让我感到愉悦，我喜欢音乐课。音乐课真有趣。"
                 }
             ];
             
-            localStorage.setItem('studentSubmissions', JSON.stringify(sampleSubmissions));
-            studentSubmissions = sampleSubmissions;
-            updateDisplay();
-            
-            alert("示例数据已添加！");
+            try {
+                // 先清空现有数据
+                await fetch('api.php', { method: 'DELETE' });
+                
+                // 逐个添加示例数据
+                for (const submission of sampleSubmissions) {
+                    await fetch('api.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(submission)
+                    });
+                }
+                
+                // 重新加载数据
+                await loadSubmissions();
+                alert("示例数据已添加！");
+            } catch (error) {
+                console.error('添加示例数据失败:', error);
+                alert("添加示例数据失败，请重试！");
+            }
         }
         
         // 更新显示
@@ -524,12 +541,23 @@
         }
         
         // 清空所有内容
-        function clearAllSubmissions() {
+        async function clearAllSubmissions() {
             if (confirm("确定要清空所有学生的提交内容吗？此操作不可撤销！")) {
-                localStorage.removeItem('studentSubmissions');
-                studentSubmissions = [];
-                updateDisplay();
-                alert("所有内容已清空！");
+                try {
+                    const response = await fetch('api.php', { method: 'DELETE' });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        studentSubmissions = [];
+                        updateDisplay();
+                        alert("所有内容已清空！");
+                    } else {
+                        throw new Error(result.error || '清空失败');
+                    }
+                } catch (error) {
+                    console.error('清空数据失败:', error);
+                    alert("清空失败，请重试！");
+                }
             }
         }
         
