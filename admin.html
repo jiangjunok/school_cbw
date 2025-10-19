@@ -365,7 +365,21 @@
         // 加载学生提交数据
         async function loadSubmissions() {
             try {
-                const response = await fetch('api.php?action=get');
+                // 使用绝对路径，确保在不同设备上都能正常访问
+                const apiUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'api.php?action=get';
+                console.log('请求API地址:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -377,15 +391,15 @@
                     connectionStatus.textContent = "✅ 系统已连接，正在监听学生提交...";
                     connectionStatus.className = "connection-status connected";
                 } else {
-                    throw new Error(result.error || '加载数据失败');
+                    throw new Error(result.error || '服务器返回错误');
                 }
             } catch (error) {
                 console.error("加载数据失败:", error);
                 studentSubmissions = [];
                 updateDisplay();
                 
-                // 更新连接状态
-                connectionStatus.textContent = "❌ 连接服务器失败，请检查网络";
+                // 更新连接状态 - 显示具体错误信息
+                connectionStatus.textContent = `❌ 连接失败: ${error.message}`;
                 connectionStatus.className = "connection-status disconnected";
             }
         }
@@ -420,13 +434,15 @@
             ];
             
             try {
+                const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+                
                 // 先清空现有数据
-                await fetch('api.php?action=clear');
+                await fetch(baseUrl + 'api.php?action=clear');
                 
                 // 逐个添加示例数据
                 for (const submission of sampleSubmissions) {
                     const transcript = encodeURIComponent(submission.transcript);
-                    const url = `api.php?action=add&id=${submission.id}&transcript=${transcript}`;
+                    const url = baseUrl + `api.php?action=add&id=${submission.id}&transcript=${transcript}`;
                     await fetch(url);
                 }
                 
@@ -540,7 +556,8 @@
         async function clearAllSubmissions() {
             if (confirm("确定要清空所有学生的提交内容吗？此操作不可撤销！")) {
                 try {
-                    const response = await fetch('api.php?action=clear');
+                    const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+                    const response = await fetch(baseUrl + 'api.php?action=clear');
                     const result = await response.json();
                     
                     if (result.success) {

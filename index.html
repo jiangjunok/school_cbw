@@ -218,9 +218,7 @@
             <button id="clearButton">清除内容</button>
         </div>
 
-        <div class="teacher-link">
-            <p>老师查看高频词请点击：<a href="admin.html" target="_blank">教师端</a></p>
-        </div>
+
 
         <div class="instructions">
             <h3>使用说明：</h3>
@@ -289,10 +287,12 @@
                 connectionStatus.className = "connection-status connected";
                 submitButton.disabled = true;
 
-                // 使用GET请求发送到服务器（避免405错误）
+                // 使用绝对路径和GET请求发送到服务器
                 const transcript = encodeURIComponent(textInput.value);
-                const url = `api.php?action=add&id=${studentId}&transcript=${transcript}`;
-
+                const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+                const url = baseUrl + `api.php?action=add&id=${studentId}&transcript=${transcript}`;
+                
+                console.log('提交到API地址:', url);
                 const response = await fetch(url);
 
                 const result = await response.json();
