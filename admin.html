@@ -513,16 +513,21 @@
             // 计算最大频率
             const maxFrequency = Math.max(...Object.values(wordFrequencies));
             
+            // 获取容器尺寸
+            const containerWidth = wordCloud.offsetWidth;
+            const containerHeight = wordCloud.offsetHeight;
+            
             // 为每个词语创建元素
             words.forEach(word => {
                 const frequency = wordFrequencies[word];
-                const fontSize = 24 + (frequency / maxFrequency) * 80; // 基础24px + 根据频率缩放
+                const fontSize = Math.min(24 + (frequency / maxFrequency) * 60, 80); // 限制最大字体大小
                 
                 // 创建词语元素
                 const wordElement = document.createElement('div');
                 wordElement.className = 'word';
                 wordElement.textContent = word;
                 wordElement.style.fontSize = `${fontSize}px`;
+                wordElement.style.whiteSpace = 'nowrap'; // 防止换行
                 
                 // 根据频率选择颜色
                 const colorIndex = Math.min(
@@ -531,18 +536,35 @@
                 );
                 wordElement.style.color = colors[colorIndex];
                 
-                // 随机位置（避免重叠的简单实现）
-                const left = Math.random() * (wordCloud.offsetWidth - 150);
-                const top = Math.random() * (wordCloud.offsetHeight - 80);
+                // 临时添加到DOM以获取实际尺寸
+                wordElement.style.visibility = 'hidden';
+                wordElement.style.position = 'absolute';
+                wordCloud.appendChild(wordElement);
+                
+                // 获取词语实际尺寸
+                const wordWidth = wordElement.offsetWidth;
+                const wordHeight = wordElement.offsetHeight;
+                
+                // 计算安全的位置范围，确保词语完全在容器内
+                const maxLeft = Math.max(0, containerWidth - wordWidth - 10);
+                const maxTop = Math.max(0, containerHeight - wordHeight - 10);
+                
+                // 随机位置（确保在安全范围内）
+                const left = Math.random() * maxLeft;
+                const top = Math.random() * maxTop;
+                
+                // 设置最终位置和样式
                 wordElement.style.left = `${left}px`;
                 wordElement.style.top = `${top}px`;
+                wordElement.style.visibility = 'visible';
+                
+                // 添加鼠标悬停提示
+                wordElement.title = `"${word}" 出现了 ${frequency} 次`;
                 
                 // 添加点击事件显示频率
                 wordElement.addEventListener('click', function() {
                     alert(`"${word}" 出现了 ${frequency} 次`);
                 });
-                
-                wordCloud.appendChild(wordElement);
             });
         }
         
